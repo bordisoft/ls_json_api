@@ -33,7 +33,6 @@ sub get_account_list
 		@{$new_hash} {keys %$hash} = values %$hash;
 		$hash = $new_hash;
 	}
-	$self->_dump($hash);
 	my $accounts_info = $ac->getlist($hash);
 	my $output = {
 		limit => $p->{limit},
@@ -48,13 +47,14 @@ sub get_account_list
 		use JsonApi::Account;
 
 		foreach my $account (@{$accounts_info->{numbers_list}})
-		{$self->_dump($account);
+		{
 			my $row = {
 				balance =>  abs(("Debit" eq $account->{model} ? $account->{balance} : ($account->{credit_limit} ? $account->{credit_limit} : 0) - $account->{balance})),
 				batch => $account->{batch},
 				id => $account->{id},
 				i_account => $account->{i_account},
 				model => $account->{model},
+				idle => $account->{"last"},
 				product => $account->{product},
 				um_enabled => $account->{um_enabled},
 			};
