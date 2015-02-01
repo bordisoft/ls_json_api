@@ -27,11 +27,11 @@ sub get_account_list
 		real_accounts_mode	=> $p->{filter} && $p->{filter}->{real_accounts_mode} || 0,
 	});
 	my $output = {limit => $p->{limit}, from => $p->{from}, total_count => $accounts_info->{total_number}, subtotal_count => 0, filter => $p->{filter}, list => []};
-
+$self->_dump($accounts_info);
 	if(@{$accounts_info->{numbers_list}})
 	{
 		foreach my $account (@{$accounts_info->{numbers_list}})
-		{$self->_dump($account);
+		{
 			my $row = {
 				balance => $self->_format_price($account->{balance}+($account->{credit_limit} ? $account->{credit_limit} : 0),$account->{iso_4217}),
 				batch => $account->{batch},
