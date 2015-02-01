@@ -27,9 +27,8 @@ sub get_account_list
 		hide_closed_mode	=> defined $p->{filter} && $p->{filter}->{hide_closed_mode} ? $p->{filter}->{hide_closed_mode} : 1,
 		real_accounts_mode	=> defined $p->{filter} && $p->{filter}->{real_accounts_mode} ? $p->{filter}->{real_accounts_mode} : 0,
 	};
-	@$hash{ keys %{$p->{filter}} } = values %$hash if defined $p->{filter};
-	my $accounts_info = $ac->getlist();
-
+	@$hash{ keys %{$p->{filter}} } = values %$hash if defined $p->{filter};$self->_dump($hash);
+#	my $accounts_info = $ac->getlist($hash);
 	my $output = {
 		limit => $p->{limit},
 		from => $p->{from},
@@ -38,29 +37,28 @@ sub get_account_list
 		filter => $p->{filter},
 		list => []
 	};
-
-	if($accounts_info->{total_number} > 0)
-	{
-		use JsonApi::Account;
-
-		foreach my $account (@{$accounts_info->{numbers_list}})
-		{
-			my $row = {
-				balance =>  abs(("Debit" eq $account->{model} ? $account->{balance} : ($account->{credit_limit} ? $account->{credit_limit} : 0) - $account->{balance})),
-				batch => $account->{batch},
-				id => $account->{id},
-				i_account => $account->{i_account},
-				model => $account->{model},
-				product => $account->{product},
-				um_enabled => $account->{um_enabled},
-			};
-			my $status = JsonApi::Account::get_status($account);
-	    	$row->{status} = $status->{name} ? $status->{name} : $self->_localize($status->{value});
-			$row->{sip_status} = $ac->getSIPinfo($account->{id}) ? 'on' : 'off';
-			push(@{$output->{list}},$row);
-			++$output->{subtotal_count};
-		}
-	}
+#	if($accounts_info->{total_number} > 0)
+#	{
+#		use JsonApi::Account;
+#
+#		foreach my $account (@{$accounts_info->{numbers_list}})
+#		{
+#			my $row = {
+#				balance =>  abs(("Debit" eq $account->{model} ? $account->{balance} : ($account->{credit_limit} ? $account->{credit_limit} : 0) - $account->{balance})),
+#				batch => $account->{batch},
+#				id => $account->{id},
+#				i_account => $account->{i_account},
+#				model => $account->{model},
+#				product => $account->{product},
+#				um_enabled => $account->{um_enabled},
+#			};
+#			my $status = $self->_get_status("Account",$account);
+#	    	$row->{status} = "ok" eq $status ? "Ok" : $self->_localize($status);
+#			$row->{sip_status} = $ac->getSIPinfo($account->{id}) ? 'on' : 'off';
+#			push(@{$output->{list}},$row);
+#			++$output->{subtotal_count};
+#		}
+#	}
 
 	return $output;
 }
@@ -69,34 +67,10 @@ sub get_status
 {
 	my $self = shift;
 	my $info = $self->_get('info');
-	my $status = {value => 'ok', name => 'Ok'};
 
-	if($info->{bill_closed})
-	{
-		$status = {value => 'closed', name => $self->_localize('closed')};
-	}
-	elsif($info->{blocked} eq 'Y')
-	{
-	    $status = {value => 'blocked', name => $self->_localize('blocked')};
-	}
-	elsif($info->{bill_suspended} && !$info->{bill_suspension_delayed})
-	{
-		$status = {value => 'suspended', name => $self->_localize('suspended')};
-	}
-	elsif($info->{status})
-	{
-		$status = {value => 'credit_exceed', name => $self->_localize('credit_exceed')};
-	}
-	elsif($info->{bill_suspension_delayed})
-	{
-		$status = {value => 'suspended', name => $self->_localize('suspended')};
-	}
-	elsif($info->{frozen})
-	{
-		$status = {value => 'frozen', name => $self->_localize('frozen')};
-	}
+	my $status = $self->_get_status("Customer",$info);
 
-	return $status;
+	return {value => $status, access => "read", name => ("ok" eq $status ? "Ok" : $self->_localize($status))};
 }
 
 1;

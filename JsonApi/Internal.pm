@@ -38,6 +38,100 @@ sub _get
 	}
 }
 
+sub _get_status
+{
+	my ($self,$realm,$info) = @_;
+	my $status = 'ok';
+
+	if("Account" eq $realm)
+	{
+		if($info->{'service_state'}->{'voice_fraud_suspicion'})
+		{
+			if($info->{'service_state'}->{'voice_fraud_suspicion'} eq '5')
+			{
+				$status = 'status_quarantine';
+			}
+			elsif($info->{'service_state'}->{'voice_fraud_suspicion'} eq '1')
+			{
+				$status = 'status_screening';
+			}
+		}
+		elsif($info->{bill_closed})
+		{
+			$status = 'closed';
+		}
+		elsif($info->{bill_inactive})
+		{
+		    $status = 'inactive';
+		}
+		elsif($info->{customer_bill_suspended} && !($info->{cust_bill_suspension_delayed}))
+		{
+			$status = 'suspended';
+		}
+		elsif(defined($info->{blocked}) && $info->{blocked} eq 'Y')
+		{
+			$status = 'blocked';
+		}
+		elsif (defined($info->{customer_blocked}) && $info->{customer_blocked} eq 'Y')
+		{
+			$status = 'blocked';
+		}
+		elsif ($info->{account_expired})
+		{
+			$status = 'expired';
+		}
+		elsif ($info->{account_inactive})
+		{
+			$status = 'inactive';
+		}
+		elsif ($info->{credit_exceed})
+		{
+			$status = 'credit_exceed';
+		}
+		elsif ($info->{customer_credit_exceed})
+		{
+			$status = 'credit_exceed';
+		}
+		elsif ($info->{zero_balance})
+		{
+			$status = 'zero_balance';
+		}
+		elsif ($info->{cust_bill_suspension_delayed})
+		{
+			$status = 'suspended';
+		}
+	}
+	else
+	{
+		if($info->{bill_closed})
+		{
+			$status = 'closed';
+		}
+		elsif($info->{blocked} eq 'Y')
+		{
+		    $status = 'blocked';
+		}
+		elsif($info->{bill_suspended} && !$info->{bill_suspension_delayed})
+		{
+			$status = 'suspended';
+		}
+		elsif($info->{status})
+		{
+			$status = 'credit_exceed';
+		}
+		elsif($info->{bill_suspension_delayed})
+		{
+			$status = 'suspended';
+		}
+		elsif($info->{frozen})
+		{
+			$status = 'frozen';
+		}
+	}
+
+	return $status;
+}
+
 sub _get_service
 {
 	my ($self, $attribute) = @_;

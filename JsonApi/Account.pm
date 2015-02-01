@@ -143,71 +143,11 @@ sub set_aliases
 sub get_status
 {
 	my $self = shift;
-	my $info = ref($self) eq "STRING" ? $self->_get('info') : $self;
+	my $info = $self->_get('info');
 
-	die "500 not enough args to be used in static contents" if !$info;
+	my $status = $self->_get_status("Account",$info);
 
-	my $status = {value => 'ok', access => "read"};
-
-	if($info->{'service_state'}->{'voice_fraud_suspicion'})
-	{
-		if($info->{'service_state'}->{'voice_fraud_suspicion'} eq '5')
-		{
-			$status->{value} = 'status_quarantine';
-		}
-		elsif($info->{'service_state'}->{'voice_fraud_suspicion'} eq '1')
-		{
-			$status->{value} = 'status_screening';
-		}
-	}
-	elsif($info->{bill_closed})
-	{
-		$status->{value} = 'closed';
-	}
-	elsif($info->{bill_inactive})
-	{
-	    $status->{value} = 'inactive';
-	}
-	elsif($info->{customer_bill_suspended} && !($info->{cust_bill_suspension_delayed}))
-	{
-		$status->{value} = 'suspended';
-	}
-	elsif(defined($info->{blocked}) && $info->{blocked} eq 'Y')
-	{
-		$status->{value} = 'blocked';
-	}
-	elsif (defined($info->{customer_blocked}) && $info->{customer_blocked} eq 'Y')
-	{
-		$status->{value} = 'blocked';
-	}
-	elsif ($info->{account_expired})
-	{
-		$status->{value} = 'expired';
-	}
-	elsif ($info->{account_inactive})
-	{
-		$status->{value} = 'inactive';
-	}
-	elsif ($info->{credit_exceed})
-	{
-		$status->{value} = 'credit_exceed';
-	}
-	elsif ($info->{customer_credit_exceed})
-	{
-		$status->{value} = 'credit_exceed';
-	}
-	elsif ($info->{zero_balance})
-	{
-		$status->{value} = 'zero_balance';
-	}
-	elsif ($info->{cust_bill_suspension_delayed})
-	{
-		$status->{value} = 'suspended';
-	}
-
-	$status->{name} = ("Ok" ne $status->{value} && ref($self) eq "STRING") ? $self->_localize($status->{value}) : ("Ok" eq $status->{value} ? "Ok" : undef);
-
-	return $status;
+	return {value => $status, access => "read", name => ("ok" eq $status ? "Ok" : $self->_localize($status))};
 }
 
 
