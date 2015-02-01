@@ -665,7 +665,6 @@ sub _attribute_properties
 		ecommerce_enabled => {locale => {const=>'E-commerce Enabled',file=>'account.xml'}, access => {obj=>'Accounts',attr=>'ecommerce_enabled'}, type => 'string'},
 		billing_model => {locale => {const=>'Type',file=>'account.xml'}, access => {obj=>'Accounts',attr=>'billing_model'}},
 		um_enabled => {locale => {const=>'UM Enabled',file=>'account.xml'}, access => {obj=>'Accounts',attr=>'um_enabled'}, type => 'string'},
-		follow_me_enabled => {locale => {const=>'Follow Me Enabled',file=>'account.xml'}, access => {obj=>'Accounts',attr=>'follow_me_enabled'}, type => 'string'},
 		ppm_enabled => {locale => {const=>'PPM_Enabled',file=>'customer.xml'}, access => {obj=>$acl_obj,attr=>'ppm_enabled'}, type => 'string'},
 		drm_enabled => {locale => {const=>'DRM_Enabled',file=>'customer.xml'}, access => {obj=>'Customers',attr=>'drm_enabled'}, type => 'string'},
 		iso_4217 => {locale => {const=>'Currency',file=>$realm_file}, access => {obj=>$acl_obj,attr=>'iso_4217'}},
@@ -983,6 +982,7 @@ sub _get_locale_properties
 		caller_number_and_name => {locale_const => "Caller_Number_and_Name", locale_file => 'follow_me.xml'},
 		caller_number_and_forwarder_name => {locale_const => "Caller_Number_and_Forwarder_Name", locale_file => 'follow_me.xml'},
 		forwarder_number_and_name => {locale_const => "Forwarder_Number_and_Name", locale_file => 'follow_me.xml'},
+		follow_me_enabled => {locale_const => 'Follow Me Enabled', locale_file => 'account.xml'},
 	};
 
 	return $locale->{$constant} || undef;
