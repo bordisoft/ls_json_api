@@ -141,9 +141,9 @@ sub set_aliases
 }
 
 sub get_status
-{use Data::Dumper;
-	my $self = shift;print STDERR Dumper($self);
-	my $info = ref($self) eq "STRING" ? shift : $self->_get('info');
+{
+	my $self = shift;
+	my $info = ref($self) eq "STRING" ? $self->_get('info') : $self;
 
 	die "500 not enough args to be used in static contents" if !$info;
 
