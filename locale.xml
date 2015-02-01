@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+<message name="SUCCESS">
+<en>Success</en>
+</message>
+<message name="SUCCESS_UPDATED">
+<en>Successfully Updated</en>
+</message>
+<message name="ERROR">
+<en>Error #code#</en>
+</message>
+<message name="ERROR_400">
+<en>Bad Request</en>
+</message>
+<message name="ERROR_421">
+<en>Password is too weak</en>
+</message>
+<message name="ERROR_500">
+<en>Internal Server Error</en>
+</message>
+<message name="ERROR_600">
+<en>System is unable to proceed the transaction</en>
+</message>
+<message name="ERROR_601">
+<en>Transaction has failed</en>
+</message>
+<message name="ERROR_602">
+<en>System can't proccess payment</en>
+</message>
+<message name="ERROR_603">
+<en>Payment processor is not supported</en>
+</message>
+<message name="ERROR_604">
+<en>Amount is not big enough</en>
+</message>
+<message name="ERROR_605">
+<en>Incorrect voucher</en>
+</message>
+<message name="ERROR_606">
+<en>'To date' is mandatory</en>
+</message>
+<message name="ERROR_607">
+<en>'From date' is mandatory</en>
+</message>
+<message name="ERROR_608">
+<en>Date format is incorrect</en>
+</message>
+<message name="ERROR_609">
+<en>Date is invalid</en>
+</message>
+<message name="ERROR_610">
+<en>Start date is bigger than finish date</en>
+</message>
+<message name="ERROR_610">
+<en>Start date is bigger than finish date</en>
+</message>
+<message name="ERROR_700">
+<en>Error parsing locale file</en>
+</message>
+<message name="TITLE_DASHBOARD">
+<en>Dasboard</en>
+</message>
+<message name="TITLE_INFO">
+<en>Info</en>
+</message>
+<message name="TITLE_PAYMENT">
+<en>Payment</en>
+</message>
+<message name="TITLE_FEATURES">
+<en>Features</en>
+</message>
+<message name="JS_MAND_CHECKBOX">
+<en>This checkbox is mandatory</en>
+</message>
+<message name="JS_SELECT_ITEM">
+<en>Please select an item</en>
+</message>
+<message name="JS_INVALID_CHARACTER">
+<en>This character is forbidden</en>
+</message>
+<message name="JS_THIS">
+<en>This</en>
+</message>
+<message name="JS_MAND_FIELD">
+<en>field is mandatory</en>
+</message>
+<message name="JS_ENTER_VALID_EMAIL">
+<en>Please enter valid email address</en>
+</message>
+<message name="HELLO">
+<en>Hello</en>
+</message>
+<message name="UPDATE">
+<en>Update</en>
+</message>
+<message name="COUNTRIES">
+<en>Countries</en>
+</message>
+<message name="MOBILE_INTERNET">
+<en>Mobile Internet</en>
+</message>
+<message name="TITLE_CALCULATOR">
+<en>Rate Calculator</en>
+</message>
+<message name="CALL_FROM">
+<en>I am in</en>
+</message>
+<message name="CALL_TO">
+<en>I will call to</en>
+</message>
+<message name="LANDLINE">
+<en>Landline</en>
+</message>
+<message name="RATE_NOT_FOUND">
+<en>Rate has not been found</en>
+</message>
+</root>

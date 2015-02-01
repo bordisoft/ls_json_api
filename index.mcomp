@@ -1,0 +1,48 @@
+% $m->print(encode_json($output));
+<%args>
+	$args
+	$ph
+</%args>
+<%init>
+    use strict;
+    use warnings;
+	use lib $ENV{'PORTAHOME_WEB'}.'/apache/ls_json_api';
+    use JSON;
+
+    my $output = undef;
+    my @set_requests;
+    my @get_requests;
+    my $realm = $ENV{JSON_Api_Realm};
+	my $module = 'JsonApi::'.$realm;
+
+	if($realm eq 'Telisim')
+	{
+		use JsonApi::Telisim;
+	}
+	elsif($realm eq 'Account')
+	{
+		use JsonApi::Account;
+	}
+	elsif($realm eq 'Customer')
+	{
+		use JsonApi::Customer;
+	}
+
+
+	my $obj = new $module($ph);
+
+    foreach my $task (keys %$args)
+    {
+    	my $_args = (ref($args->{$task}) eq "HASH" || ref($args->{$task}) eq "ARRAY" && @{$args->{$task}}) ? $args->{$task} : undef;
+    	if($task =~ /^set\_*+/)
+    	{
+			push(@set_requests,{task=>$task, args=>$_args});
+    	}
+		else
+    	{
+			push(@get_requests,{task=>$task, args=>$_args});
+    	}
+    }
+
+    $output = {response => $obj->call(\@set_requests, \@get_requests), error => 0, code => 200};
+</%init>

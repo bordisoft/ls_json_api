@@ -1,0 +1,115 @@
+% $m->print($page_content);
+<%flags>
+	inherit => undef
+</%flags>
+<%init>
+    use strict;
+    use warnings;
+    use utf8;
+    use CGI::Cookie;
+    use Porta;
+    use Porta::AccessType;
+	use Data::UUID;
+	use Digest::MD5  qw(md5_hex);
+	use Porta::Admin::WebSessionController;
+	use ModPerlAPI;
+	use JSON;
+	use Encode qw( encode_utf8 );
+	use Data::Dumper;
+
+    my $ph = new Porta;
+    my $page_content;
+    my $xid;
+    my $realm;
+    my %realms = (Account => 'accounts', Telisim => 'accounts', Customer => 'customer');
+    my $args;
+    my %cookies;
+    my %_cookies = CGI::Cookie->parse(ModPerlAPI->get_header($r, 'Cookie') || '');
+
+	$r->content_type("application/json");
+    Porta::utf_decode_ref(\%ARGS);
+
+    $ph->set_sc( Porta::Admin::WebSessionController->new($ph) );
+
+	$xid = $_cookies{'XID'}->value() if (defined ($_cookies{'XID'}) && $_cookies{'XID'}->value());
+	$realm = $_cookies{'REALM'}->value() if (defined ($_cookies{'REALM'}) && defined ($_cookies{'REALM'}->value()) && defined ($realms{$_cookies{'REALM'}->value()}));
+	$args = decode_json (encode_utf8($ARGS{json})) if defined $ARGS{json};
+	if($xid && $realm)
+	{
+		$ENV{Porta_Realm} = $realms{$realm} || undef;
+		die '400' if !$ENV{Porta_Realm};
+		$ENV{JSON_Api_Realm} = $realm;
+		$ph->get_sc()->load_realm($ENV{Porta_Realm});
+		my $xid_name = $realm eq 'Account' || $realm eq 'Telisim' ? 'AID' : 'CID';
+		%cookies = CGI::Cookie->parse($xid_name.'='.$xid);
+	}
+
+	if(ref($args) eq "HASH" && %$args)
+	{
+		if(defined($args->{restore}) && defined($args->{restore}->{pb_auth_user}) && defined($args->{restore}->{email}))
+		{
+			my @modules = ("Porta::Account","Porta::Customer");
+			my $limit = scalar grep { defined $_ } @modules;
+			my $i = 0;
+			my $error = "Forbidden";
+			while(!$page_content && $i < $limit)
+			{
+				my $module = $modules[$i];
+				eval "use $module; 1";
+				my $obj =  new $module($ph);
+				if($obj->reset_password({login => $args->{restore}->{pb_auth_user}, email => $args->{restore}->{email}}))
+				{
+					$page_content = encode_json({success => "Your new password has been emailed to you"});
+				}
+				else
+				{
+					$error = $obj->{errstr};
+				}
+				$i++;
+			}
+			$page_content = encode_json({ response => $error, error => 1, code => 403 }) if !$page_content;
+		}
+		elsif(%cookies && defined($args->{logout}))
+		{
+			$ph->get_sc->logout_v2(\%cookies);
+			$xid = '';
+		}
+		elsif(defined($args->{login}) && defined($args->{login}->{pb_auth_user}) && defined($args->{login}->{pb_auth_password}))
+		{
+			my $pb_auth_user = $args->{login}->{pb_auth_user};
+			my $pb_auth_password = $args->{login}->{pb_auth_password};
+			my @allowed_realms = qw(accounts customer);
+			my $limit = scalar grep { defined $_ } @allowed_realms;
+			my $i = 0;
+			my $i_customer;
+
+			while(!$i_customer && $i < $limit)
+			{
+				$realm =  $allowed_realms[$i];
+				$ph->get_sc()->load_realm($realm);
+				$i_customer = $ph->get_sc()->authenticate($pb_auth_user, $pb_auth_password);
+				$i++;
+			}
+
+			if ($i_customer)
+			{
+				my $api_realm = undef;
+				foreach(keys %realms) { if($realms{$_} eq $realm && "Telisim" ne $_) { $api_realm = $_; last; } }
+				$api_realm = 'Telisim' if('Account' eq $api_realm && $ph->{account_info}->{id} =~ m/^8923418\d{12}$/);
+				my $cookie = $ph->get_sc()->create_session();
+				$xid = join('',@{$cookie->{value}});
+				$page_content = encode_json({response => {xid => $xid, realm => $api_realm}, error => 0, code => 200});
+			}
+		}
+		elsif (%cookies && $ph->get_sc()->is_session_valid(\%cookies))
+		{
+			my $ug = Data::UUID->new();
+			$ph->get_sc()->load_access_config();
+			$ph->get_sc()->set_session_var( $ph->{session_id}, 'token_secure_key', md5_hex( $ug->create_str() ) );
+			$ENV{token_secure_key} = $ph->get_sc()->get_session_var( $ph->{session_id}, 'token_secure_key' );
+			$page_content = $m->scomp('index.mcomp', args => $args, ph => $ph);
+		}
+	}
+
+	$page_content = !$page_content ? encode_json({ response => 'Unauthorized', error => 1, code => 401 }) : $page_content;
+</%init>
