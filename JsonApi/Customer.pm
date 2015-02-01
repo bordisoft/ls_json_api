@@ -27,7 +27,8 @@ sub get_account_list
 		hide_closed_mode	=> defined $p->{filter} && $p->{filter}->{hide_closed_mode} ? $p->{filter}->{hide_closed_mode} : 1,
 		real_accounts_mode	=> defined $p->{filter} && $p->{filter}->{real_accounts_mode} ? $p->{filter}->{real_accounts_mode} : 0,
 	};
-	$hash = @{$p->{filter}} keys %{$hash} } = values %{$p->{filter}} if defined $p->{filter};$self->_dump($hash);
+	@{$p->{filter}} keys %{$hash} } = values %{$p->{filter}} if (defined $p->{filter} && ref($p->{filter}) eq "HASH");
+	$hash = $p->{filter} if (defined $p->{filter} && ref($p->{filter}) eq "HASH");$self->_dump($hash);
 #	my $accounts_info = $ac->getlist($hash);
 	my $output = {
 		limit => $p->{limit},
