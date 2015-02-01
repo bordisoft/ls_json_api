@@ -10,23 +10,34 @@ use parent 'JsonApi';
 
 sub get_account_list
 {
+	my ($self,$p) = @_;
+
+	die "403 no permissions to access accounts list" if(!($self->_get_access({attr => '*', obj => 'Accounts'})));
+
 	use Porta::Account;
 
-	my ($self,$p) = @_;
-	$p->{limit} = (!$p->{limit} || $p->{limit}) > 100 ? 30 : $p->{limit};
-	$p->{from} = $p->{from} || 0;
 	my $info = $self->_get('info');
 	my $ph = $self->_get('ph');
 	my $ac = new Porta::Account($ph);
-	my $accounts_info = $ac->getlist({
+	my $hash = {
 		i_customer			=> $info->{i_customer},
-		from				=> $p->{from},
-		limit				=> $p->{limit},
-		sip_status			=> $p->{filter} && $p->{filter}->{sip_status} || 'ANY',
-		hide_closed_mode	=> $p->{filter} && $p->{filter}->{hide_closed_mode} || 1,
-		real_accounts_mode	=> $p->{filter} && $p->{filter}->{real_accounts_mode} || 0,
-	});
-	my $output = {limit => $p->{limit}, from => $p->{from}, total_count => $accounts_info->{total_number}, subtotal_count => 0, filter => $p->{filter}, list => []};
+		from				=> $p->{from} || 0,
+		limit				=> !defined $p->{limit} || $p->{limit} > 100 ? 30 : $p->{limit},
+		sip_status			=> defined $p->{filter} && $p->{filter}->{sip_status} ? $p->{filter}->{sip_status} : 'ANY',
+		hide_closed_mode	=> defined $p->{filter} && $p->{filter}->{hide_closed_mode} ? $p->{filter}->{hide_closed_mode} : 1,
+		real_accounts_mode	=> defined $p->{filter} && $p->{filter}->{real_accounts_mode} ? $p->{filter}->{real_accounts_mode} : 0,
+	};
+	@$hash{ keys %{$p->{filter}} } = values %$hash if defined $p->{filter};
+	my $accounts_info = $ac->getlist();
+
+	my $output = {
+		limit => $p->{limit},
+		from => $p->{from},
+		total_count => $accounts_info->{total_number},
+		subtotal_count => 0,
+		filter => $p->{filter},
+		list => []
+	};
 $self->_dump($accounts_info);
 	if(@{$accounts_info->{numbers_list}})
 	{
