@@ -30,7 +30,7 @@ sub get_account_list
 	if(defined $p->{filter} && ref($p->{filter}) eq "HASH")
 	{
 		my $new_hash = $p->{filter};
-		@{$new_hash} {keys %hash} = values %hash;
+		@{$new_hash} {keys %$hash} = values %$hash;
 		$hash = $new_hash;
 	}
 	$self->_dump($hash);
