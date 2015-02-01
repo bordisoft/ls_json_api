@@ -34,7 +34,7 @@ sub get_account_list
 		$hash = $new_hash;
 	}
 	$self->_dump($hash);
-#	my $accounts_info = $ac->getlist($hash);
+	my $accounts_info = $ac->getlist($hash);
 	my $output = {
 		limit => $p->{limit},
 		from => $p->{from},
@@ -43,28 +43,28 @@ sub get_account_list
 		filter => $p->{filter},
 		list => []
 	};
-#	if($accounts_info->{total_number} > 0)
-#	{
-#		use JsonApi::Account;
-#
-#		foreach my $account (@{$accounts_info->{numbers_list}})
-#		{
-#			my $row = {
-#				balance =>  abs(("Debit" eq $account->{model} ? $account->{balance} : ($account->{credit_limit} ? $account->{credit_limit} : 0) - $account->{balance})),
-#				batch => $account->{batch},
-#				id => $account->{id},
-#				i_account => $account->{i_account},
-#				model => $account->{model},
-#				product => $account->{product},
-#				um_enabled => $account->{um_enabled},
-#			};
-#			my $status = $self->_get_status("Account",$account);
-#	    	$row->{status} = "ok" eq $status ? "Ok" : $self->_localize($status);
-#			$row->{sip_status} = $ac->getSIPinfo($account->{id}) ? 'on' : 'off';
-#			push(@{$output->{list}},$row);
-#			++$output->{subtotal_count};
-#		}
-#	}
+	if($accounts_info->{total_number} > 0)
+	{
+		use JsonApi::Account;
+
+		foreach my $account (@{$accounts_info->{numbers_list}})
+		{
+			my $row = {
+				balance =>  abs(("Debit" eq $account->{model} ? $account->{balance} : ($account->{credit_limit} ? $account->{credit_limit} : 0) - $account->{balance})),
+				batch => $account->{batch},
+				id => $account->{id},
+				i_account => $account->{i_account},
+				model => $account->{model},
+				product => $account->{product},
+				um_enabled => $account->{um_enabled},
+			};
+			my $status = $self->_get_status("Account",$account);
+	    	$row->{status} = "ok" eq $status ? "Ok" : $self->_localize($status);
+			$row->{sip_status} = $ac->getSIPinfo($account->{id}) ? 'on' : 'off';
+			push(@{$output->{list}},$row);
+			++$output->{subtotal_count};
+		}
+	}
 
 	return $output;
 }
