@@ -54,7 +54,8 @@ sub get_account_list
 				product => $account->{product},
 				um_enabled => $account->{um_enabled},
 			};
-	    	$row->{status} = JsonApi::Account::get_status($account);
+			my $status = JsonApi::Account::get_status($account);
+	    	$row->{status} = $status->{name} ? $status->{name} : $self->_localize($status->{value});
 			$row->{sip_status} = $ac->getSIPinfo($account->{id}) ? 'on' : 'off';
 			push(@{$output->{list}},$row);
 			++$output->{subtotal_count};

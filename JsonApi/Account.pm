@@ -147,63 +147,65 @@ sub get_status
 
 	die "500 not enough args to be used in static contents" if !$info;
 
-	my $status = {value => 'ok', name => 'Ok'};
+	my $status = {value => 'ok', access => "read"};
 
 	if($info->{'service_state'}->{'voice_fraud_suspicion'})
 	{
 		if($info->{'service_state'}->{'voice_fraud_suspicion'} eq '5')
 		{
-			$status = {value => 'status_quarantine', name => $self->_localize('status_quarantine')};
+			$status->{value} = 'status_quarantine';
 		}
 		elsif($info->{'service_state'}->{'voice_fraud_suspicion'} eq '1')
 		{
-			$status = {value => 'status_screening', name => $self->_localize('status_screening')};
+			$status->{value} = 'status_screening';
 		}
 	}
 	elsif($info->{bill_closed})
 	{
-		$status = {value => 'closed', name => $self->_localize('closed')};
+		$status->{value} = 'closed';
 	}
 	elsif($info->{bill_inactive})
 	{
-	    $status = {value => 'inactive', name => $self->_localize('inactive')};
+	    $status->{value} = 'inactive';
 	}
 	elsif($info->{customer_bill_suspended} && !($info->{cust_bill_suspension_delayed}))
 	{
-		$status = {value => 'suspended', name => $self->_localize('suspended')};
+		$status->{value} = 'suspended';
 	}
 	elsif(defined($info->{blocked}) && $info->{blocked} eq 'Y')
 	{
-		$status = {value => 'blocked', name => $self->_localize('blocked')};
+		$status->{value} = 'blocked';
 	}
 	elsif (defined($info->{customer_blocked}) && $info->{customer_blocked} eq 'Y')
 	{
-		$status = {value => 'blocked', name => $self->_localize('blocked')};
+		$status->{value} = 'blocked';
 	}
 	elsif ($info->{account_expired})
 	{
-		$status = {value => 'expired', name => $self->_localize('expired')};
+		$status->{value} = 'expired';
 	}
 	elsif ($info->{account_inactive})
 	{
-		$status = {value => 'inactive', name => $self->_localize('inactive')};
+		$status->{value} = 'inactive';
 	}
 	elsif ($info->{credit_exceed})
 	{
-		$status = {value => 'credit_exceed', name => $self->_localize('credit_exceed')};
+		$status->{value} = 'credit_exceed';
 	}
 	elsif ($info->{customer_credit_exceed})
 	{
-		$status = {value => 'credit_exceed', name => $self->_localize('credit_exceed')};
+		$status->{value} = 'credit_exceed';
 	}
 	elsif ($info->{zero_balance})
 	{
-		$status = {value => 'zero_balance', name => $self->_localize('zero_balance')};
+		$status->{value} = 'zero_balance';
 	}
 	elsif ($info->{cust_bill_suspension_delayed})
 	{
-		$status = {value => 'suspended', name => $self->_localize('suspended')};
+		$status->{value} = 'suspended';
 	}
+
+	$status->{name} = ("Ok" ne $status->{value} && ref($self) eq "STRING") ? $self->_localize($status->{value}) : ("Ok" eq $status->{value} ? "Ok" : undef);
 
 	return $status;
 }
