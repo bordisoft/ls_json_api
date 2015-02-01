@@ -38,13 +38,15 @@ sub get_account_list
 		filter => $p->{filter},
 		list => []
 	};
-$self->_dump($accounts_info);
-	if(@{$accounts_info->{numbers_list}})
+
+	if($accounts_info->{total_number} > 0)
 	{
+		use JsonApi::Account;
+
 		foreach my $account (@{$accounts_info->{numbers_list}})
 		{
 			my $row = {
-				balance => $self->_format_price($account->{balance}+($account->{credit_limit} ? $account->{credit_limit} : 0),$account->{iso_4217}),
+				balance =>  abs(("Debit" eq $account->{model} ? $account->{balance} : ($account->{credit_limit} ? $account->{credit_limit} : 0) - $account->{balance})),
 				batch => $account->{batch},
 				id => $account->{id},
 				i_account => $account->{i_account},
@@ -52,7 +54,7 @@ $self->_dump($accounts_info);
 				product => $account->{product},
 				um_enabled => $account->{um_enabled},
 			};
-	    	$row->{status} = $self->_get_account_status($account);
+	    	$row->{status} = JsonApi::Account::get_status($account);
 			$row->{sip_status} = $ac->getSIPinfo($account->{id}) ? 'on' : 'off';
 			push(@{$output->{list}},$row);
 			++$output->{subtotal_count};

@@ -143,7 +143,10 @@ sub set_aliases
 sub get_status
 {
 	my $self = shift;
-	my $info = $self->_get('info');
+	my $info = ref($self) eq "STRING" ? shift : $self->_get('info');
+
+	die "500 not enough args to be used in static contents" if !$info;
+
 	my $status = {value => 'ok', name => 'Ok'};
 
 	if($info->{'service_state'}->{'voice_fraud_suspicion'})
